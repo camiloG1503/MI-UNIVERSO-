@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Universo de Ana María</title>
+<meta name="description" content="Un corazón de partículas sobre una galaxia de palabras.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&display=swap">
+<style>
+  :root { --ice:#BAE6FD; --cyan:#22D3EE; --blue:#3B82F6; --sky:#60A5FA; --deep:#1D4ED8; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:#000; overflow:hidden; overscroll-behavior:none; touch-action:none;
+    font-family:'Cormorant Garamond',Georgia,serif; color:#fff; }
+  #scene { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; cursor:grab; }
+
+  /* Acuarela digital: manchas azules translúcidas */
+  .wash { position:fixed; inset:0; pointer-events:none; mix-blend-mode:screen; z-index:1;
+    background:
+      radial-gradient(circle at 12% 78%, rgba(34,211,238,.06), transparent 38%),
+      radial-gradient(circle at 88% 22%, rgba(59,130,246,.07), transparent 42%),
+      radial-gradient(circle at 70% 90%, rgba(186,230,253,.035), transparent 35%); }
+
+  /* Título */
+  .ui { position:fixed; inset:0; z-index:2; pointer-events:none; text-align:center;
+    padding:clamp(14px,4vh,40px) 20px 0; }
+  h1 { margin:0; font-weight:300; font-size:clamp(1.9rem,6.4vw,3.4rem); letter-spacing:.08em; line-height:1.05;
+    text-shadow:0 0 10px rgba(186,230,253,.9),0 0 32px rgba(59,130,246,.85);
+    opacity:0; transform:translateY(8px); transition:opacity 2.4s ease 1.4s, transform 2.4s ease 1.4s; }
+  .dedic { margin:.5em 0 0; font-style:italic; font-weight:300; font-size:clamp(.95rem,3.2vw,1.45rem); color:var(--ice);
+    text-shadow:0 0 14px rgba(59,130,246,.9); opacity:0; transition:opacity 2.4s ease 2.6s; }
+  .on h1, .on .dedic { opacity:1; transform:none; }
+
+  /* Decoración line-art */
+  .deco { position:fixed; z-index:1; pointer-events:none; color:var(--sky); opacity:.7;
+    filter:drop-shadow(0 0 6px currentColor); animation:sway 7s ease-in-out infinite alternate; }
+  .deco svg { width:100%; height:auto; display:block; overflow:visible; }
+  .d1 { left:-1vw; top:0; width:clamp(80px,17vw,210px); transform-origin:0 0; color:var(--cyan); }
+  .d2 { right:-1vw; bottom:0; width:clamp(80px,17vw,210px); transform-origin:100% 100%; rotate:180deg; color:var(--ice); animation-delay:-3s; }
+  .d3 { left:2.5vw; top:46vh; width:clamp(38px,8vw,100px); color:var(--ice); animation-delay:-1s; }
+  .d4 { right:3vw; top:44vh; width:clamp(34px,7vw,90px); color:var(--cyan); animation-delay:-4s; }
+  .d5 { left:6vw; bottom:5vh; width:clamp(42px,9vw,120px); color:var(--sky); animation-delay:-2s; }
+  .d6 { right:7vw; bottom:6vh; width:clamp(30px,6vw,76px); color:var(--ice); animation-delay:-5s; }
+  @keyframes sway { from { transform:rotate(-2.5deg) translateY(0); } to { transform:rotate(2.5deg) translateY(-6px); } }
+
+  /* Sobres */
+  .env { position:fixed; z-index:3; transform:translate(-50%,-50%); width:clamp(46px,9vw,74px); padding:0; border:0;
+    background:none; cursor:pointer; color:var(--ice); -webkit-tap-highlight-color:transparent; }
+  .env svg { width:100%; display:block; overflow:visible; filter:drop-shadow(0 0 8px rgba(34,211,238,.9));
+    animation:bob 4.2s ease-in-out infinite; transition:transform .3s; }
+  .env:hover svg, .env:focus-visible svg { transform:scale(1.15) rotate(-4deg); }
+  .env:focus-visible { outline:2px solid var(--cyan); outline-offset:6px; border-radius:8px; }
+  @keyframes bob { 50% { translate:0 -10px; } }
+
+  /* Modal de carta */
+  .modal { position:fixed; inset:0; z-index:10; display:grid; place-items:center; padding:16px;
+    background:rgba(2,6,23,.62); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    opacity:0; visibility:hidden; transition:opacity .4s, visibility .4s; perspective:900px; }
+  .modal.open { opacity:1; visibility:visible; }
+  .card { position:relative; width:min(92vw,460px); max-height:86dvh; overflow:auto; padding:clamp(22px,6vw,38px);
+    text-align:center; border-radius:18px; border:1px solid rgba(186,230,253,.4);
+    background:linear-gradient(160deg,rgba(29,78,216,.55),rgba(6,21,58,.92));
+    box-shadow:0 0 50px rgba(34,211,238,.28), inset 0 0 30px rgba(96,165,250,.14);
+    transform:translateY(50px) scale(.6) rotateX(50deg); transition:transform .7s cubic-bezier(.2,.9,.3,1.15); }
+  .open .card { transform:none; }
+  .card h2 { margin:0 0 .6em; font-weight:500; font-size:clamp(1.4rem,5vw,1.9rem); color:var(--ice);
+    text-shadow:0 0 14px rgba(34,211,238,.8); }
+  .card p { margin:0; font-size:clamp(1.05rem,3.8vw,1.3rem); line-height:1.55; color:#EAF6FF; white-space:pre-line; }
+  .sig { display:block; margin-top:1.2em; font-style:italic; color:var(--cyan); font-size:1.1rem; }
+  .x { position:absolute; top:8px; right:12px; width:36px; height:36px; border:0; background:none; color:var(--ice);
+    font-size:1.8rem; line-height:1; cursor:pointer; }
+
+  /* Reproductor discreto */
+  .music { position:fixed; z-index:4; top:max(12px,env(safe-area-inset-top)); right:12px; width:40px; height:40px;
+    border-radius:50%; border:1px solid rgba(186,230,253,.45); background:rgba(6,21,58,.55); color:var(--ice);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); cursor:pointer; font-size:.8rem; }
+  .music .p2 { display:none; } .music.on .p1 { display:none; } .music.on .p2 { display:inline; }
+  .music.on { box-shadow:0 0 14px rgba(34,211,238,.7); }
+
+  @media (prefers-reduced-motion:reduce) { .deco, .env svg { animation:none; } }
+</style>
+</head>
+<body>
+
+<!-- Carga el archivo de audio -->
+<audio id="bgm" src="./audio/Drake - Yebba’s Heartbreak (Audio).mp3" preload="auto" loop></audio>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="flower" viewBox="0 0 100 100">
+      <g fill="rgba(96,165,250,.08)" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+        <ellipse cx="50" cy="27" rx="10" ry="20"/>
+        <ellipse cx="50" cy="27" rx="10" ry="20" transform="rotate(72 50 50)"/>
+        <ellipse cx="50" cy="27" rx="10" ry="20" transform="rotate(144 50 50)"/>
+        <ellipse cx="50" cy="27" rx="10" ry="20" transform="rotate(216 50 50)"/>
+        <ellipse cx="50" cy="27" rx="10" ry="20" transform="rotate(288 50 50)"/>
+        <circle cx="50" cy="50" r="6"/>
+        <path d="M50 44v-8M56 50h8M50 56v8M44 50h-8" stroke-width="1"/>
+      </g>
+    </symbol>
+    <symbol id="branch" viewBox="0 0 120 220">
+      <g fill="rgba(34,211,238,.07)" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M10 0C20 60 60 90 52 150C48 180 60 200 76 218" fill="none"/>
+        <path d="M22 40q30-6 38 22q-30 8-38-22zM38 82q-30-4-34 24q28 6 34-24zM54 118q30-8 42 16q-28 14-42-16zM56 158q-26 0-30 24q24 6 30-24z"/>
+        <circle cx="76" cy="190" r="4"/><circle cx="86" cy="204" r="2.5"/><circle cx="64" cy="204" r="2"/>
+      </g>
+    </symbol>
+    <symbol id="sketch" viewBox="0 0 100 100">
+      <g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 70L32 40L55 58L78 22L92 36"/>
+        <path d="M32 40l-3-8M55 58l4 8M78 22l-4-10M10 70h-4"/>
+        <circle cx="32" cy="40" r="3"/><circle cx="55" cy="58" r="3"/><circle cx="78" cy="22" r="3"/><circle cx="10" cy="70" r="2"/><circle cx="92" cy="36" r="2"/>
+      </g>
+    </symbol>
+    <symbol id="env" viewBox="0 0 64 46">
+      <rect x="1.5" y="1.5" width="61" height="43" rx="5" fill="rgba(29,78,216,.55)" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M3 4L32 27L61 4M3 42L24 22M61 42L40 22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M32 21c-3-4-9-1-6 3c1 2 4 4 6 6c2-2 5-4 6-6c3-4-3-7-6-3z" fill="#22D3EE" stroke="none"/>
+    </symbol>
+  </defs>
+</svg>
+
+<canvas id="scene" aria-label="Corazón de partículas sobre una galaxia de palabras"></canvas>
+<div class="wash"></div>
+
+<div class="deco d2"><svg><use href="#branch"/></svg></div>
+
+<div class="ui">
+  <h1>Ana María</h1>
+  <p class="dedic">Eres mi lugar favorito en el universo.</p>
+</div>
+
+<button class="music" id="music" aria-label="Música: reproducir o pausar"><span class="p1">▶</span><span class="p2">❚❚</span></button>
+
+<div class="modal" id="modal" aria-hidden="true">
+  <article class="card" role="dialog" aria-modal="true" aria-labelledby="mt">
+    <button class="x" id="x" aria-label="Cerrar">×</button>
+    <h2 id="mt"></h2><p id="mm"></p><span class="sig" id="ms"></span>
+  </article>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(() => {
+  /* ============ EDITA AQUÍ LAS FRASES DE LA GALAXIA ============ */
+  const PHRASES = ["Princesa", "Mi Todo", "Me Encantas", "Te Amo",
+    "Única", "Mi Reina", "Mi Amor", "Mi Mundo", "Mi Luz", "Mi Tesoro", "Mi Paz",
+    "Mi Eterna", "Mi Sueño", "Mi Revolución", "Ana María", "Te Amo Infinitamente", "Mi Revolución", 
+    "Indomable", "Única", "Mi Diccionario Favorito", "Mi Refugio", "Mi Paz", "Mi Todo", "18 de Junio", 
+    "Siempre Contigo", "Mi Luz", "Mi Tesoro", "Mi Eterna", "Te Amo Infinitamente"];
+  /* ================================================================================== */
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const small = Math.min(innerWidth, innerHeight) < 700 || (navigator.hardwareConcurrency || 8) <= 4;
+  const PAL = ['#1D4ED8', '#3B82F6', '#22D3EE', '#60A5FA', '#BAE6FD', '#FFFFFF'].map(c => new THREE.Color(c));
+  const WTS = [.2, .28, .16, .2, .12, .04];
+  const pick = () => { let r = Math.random(), c = 0; while (c < 5 && r > WTS[c]) { r -= WTS[c]; c++; } return c; };
+
+  const canvas = document.getElementById('scene');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 4000);
+
+  // Cámara orbital: 1 dedo/clic = girar 360°, pellizco/rueda = acercar y alejar
+  const controls = new THREE.OrbitControls(camera, canvas);
+  Object.assign(controls, { enableDamping: true, dampingFactor: .06, enablePan: false, zoomSpeed: .8, rotateSpeed: .7 });
+
+  // Espacio exterior: negro cósmico
+  scene.background = new THREE.Color(0x000004);
+
+  // Shader compartido de partículas
+  const U = { uTime: { value: 0 }, uPixel: { value: 1 }, uK: { value: 60 }, uGlow: { value: 1 } };
+  const mat = new THREE.ShaderMaterial({
+    uniforms: U, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `
+      attribute float aSize; attribute vec3 aColor; attribute float aPhase;
+      uniform float uTime, uPixel, uK, uGlow; varying vec3 vColor; varying float vA;
+      void main(){
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        float tw = .55 + .45 * sin(uTime * 2.2 + aPhase * 3.0);
+        float fl = pow(max(0., sin(uTime * .9 + aPhase * 11.)), 24.);
+        vColor = aColor * (.7 + .5 * tw) * uGlow + vec3(fl); vA = .55 + .45 * tw + fl;
+        gl_PointSize = aSize * uPixel * (1. + fl * 1.5) * (uK / -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      varying vec3 vColor; varying float vA;
+      void main(){ float d = length(gl_PointCoord - .5); if (d > .5) discard;
+        gl_FragColor = vec4(vColor, pow(1. - d * 2., 1.8) * vA); }`
+  });
+
+  // ---------- Campo de estrellas: distintos tamaños, brillos, profundidades y parpadeo ----------
+  const starU = { uTime: U.uTime, uPR: { value: 1 } };
+  const starMat = new THREE.ShaderMaterial({
+    uniforms: starU, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `
+      attribute float aSize; attribute vec3 aColor; attribute float aPhase;
+      uniform float uTime, uPR; varying vec3 vC; varying float vA;
+      void main(){
+        float tw = .5 + .5 * sin(uTime * (.7 + aPhase * .35) + aPhase * 20.);
+        float pulse = pow(tw, 3.5);
+        vC = aColor * (1. + pulse * .85); vA = .35 + tw * .65 + pulse * .45;
+        gl_PointSize = aSize * uPR * (.8 + .5 * tw + pulse * .9);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+      }`,
+    fragmentShader: `
+      varying vec3 vC; varying float vA;
+      void main(){ float d = length(gl_PointCoord - .5); if (d > .5) discard;
+        gl_FragColor = vec4(vC, pow(1. - d * 2., 2.2) * vA); }`
+  });
+  const SCOL = ['#FFFFFF', '#E2E8F0', '#BAE6FD', '#60A5FA', '#22D3EE'].map(c => new THREE.Color(c));
+  const STN = small ? 1800 : 3800, sp3 = new Float32Array(STN * 3), sc3 = new Float32Array(STN * 3), ss = new Float32Array(STN), sph = new Float32Array(STN);
+  for (let i = 0; i < STN; i++) {
+    const depth = Math.random(), r = 700 + depth * 900, th = Math.random() * 6.283, ph = Math.acos(2 * Math.random() - 1);
+    sp3.set([r * Math.sin(ph) * Math.cos(th), r * Math.sin(ph) * Math.sin(th), r * Math.cos(ph)], i * 3);
+    SCOL[Math.floor(Math.pow(Math.random(), 1.6) * 5)].toArray(sc3, i * 3);
+    ss[i] = (.7 + Math.pow(Math.random(), 7) * 5.5) * (1.15 - depth * .45); sph[i] = Math.random() * 6.283;   // cerca = más grande
+  }
+  const sg = new THREE.BufferGeometry();
+  sg.setAttribute('position', new THREE.BufferAttribute(sp3, 3)); sg.setAttribute('aSize', new THREE.BufferAttribute(ss, 1));
+  sg.setAttribute('aColor', new THREE.BufferAttribute(sc3, 3)); sg.setAttribute('aPhase', new THREE.BufferAttribute(sph, 1));
+  const starPts = new THREE.Points(sg, starMat); starPts.frustumCulled = false; scene.add(starPts);
+
+  // ---------- Galaxia (espiral de estrellas + frases) ----------
+  const R = 50, galaxy = new THREE.Group(); scene.add(galaxy);
+  { const n = small ? 4500 : 9000, p = new Float32Array(n * 3), c = new Float32Array(n * 3), tmp = new THREE.Color();
+    for (let i = 0; i < n; i++) {
+      const r = Math.pow(Math.random(), .6) * R * 1.1, k = 1 - r / (R * 1.1);
+      const a = (i % 4) * Math.PI / 2 + r * .085 + (Math.random() - .5) * Math.random() * 1.7;
+      p.set([Math.cos(a) * r, (Math.random() - .5) * 9 * k * k, Math.sin(a) * r], i * 3);
+      tmp.copy(PAL[pick()]).lerp(PAL[5], k * .55).toArray(c, i * 3);
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p, 3)); g.setAttribute('color', new THREE.BufferAttribute(c, 3));
+    galaxy.add(new THREE.Points(g, new THREE.PointsMaterial({ size: .22, vertexColors: true, transparent: true, opacity: .85, depthWrite: false, blending: THREE.AdditiveBlending }))); }
+
+  function textTex(text) {
+    const c = document.createElement('canvas'); c.width = 512; c.height = 64; const g = c.getContext('2d');
+    g.font = '600 32px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.shadowColor = 'rgba(34,211,238,.95)'; g.shadowBlur = 12; g.fillStyle = '#E0F2FE'; g.fillText(text, 256, 34);
+    return new THREE.CanvasTexture(c);
+  }
+  const texs = PHRASES.map(textTex), PC = small ? 70 : 130;
+  for (let i = 0; i < PC; i++) {
+    const r = 11 + Math.pow(Math.random(), .8) * (R - 13), a = (i % 4) * Math.PI / 2 + r * .085 + (Math.random() - .5) * .35;
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: texs[i % texs.length], transparent: true, depthWrite: false, opacity: .5 + Math.random() * .45 }));
+    s.position.set(Math.cos(a) * r, (Math.random() - .5) * 4, Math.sin(a) * r); s.scale.set(12, 1.5, 1); galaxy.add(s);
+  }
+  // Halo y anillos
+  { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'), gr = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+    gr.addColorStop(0, 'rgba(186,230,253,.55)'); gr.addColorStop(.3, 'rgba(34,211,238,.22)'); gr.addColorStop(.65, 'rgba(29,78,216,.14)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+    const halo = new THREE.Mesh(new THREE.PlaneGeometry(R * 2.5, R * 2.5), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    halo.rotation.x = -Math.PI / 2; halo.position.y = -.3; galaxy.add(halo); }
+  const rings = [[8, 8.25, .55, 0x22D3EE], [15, 15.1, .22, 0x93C5FD]].map(([a, b, o, col]) => {
+    const m = new THREE.Mesh(new THREE.RingGeometry(a, b, 128), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: o, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+    m.rotation.x = -Math.PI / 2; galaxy.add(m); return m; });
+
+  // ---------- Corazón de partículas ----------
+  const N = small ? 7000 : 14000;
+  const home = new Float32Array(N * 3), pos = new Float32Array(N * 3), vel = new Float32Array(N * 3);
+  const size = new Float32Array(N), col = new Float32Array(N * 3), phase = new Float32Array(N), S = 1.9;
+  const hf = (x, y, z) => { const a = x * x + 2.25 * y * y + z * z - 1; return a * a * a - x * x * z * z * z - .1125 * y * y * z * z * z; };
+  for (let i = 0, tries = 0; i < N;) {
+    tries++;
+    const x = (Math.random() * 2 - 1) * 1.3, y = (Math.random() * 2 - 1) * 1.1, z = (Math.random() * 2 - 1) * 1.3, v = hf(x, y, z);
+    if (v > 0 || (Math.random() < .72 && v < -.045 && tries < N * 400)) continue;
+    const k = i * 3, r = 6 + Math.random() * 6, th = Math.random() * 6.283, ph = Math.acos(2 * Math.random() - 1);
+    home.set([x * S, z * S - .1, y * S], k);
+    pos.set([r * Math.sin(ph) * Math.cos(th), r * Math.sin(ph) * Math.sin(th), r * Math.cos(ph)], k); // ensamblaje inicial
+    const c = pick(); PAL[c].toArray(col, k); size[i] = c === 5 ? 2.4 + Math.random() * 1.6 : .8 + Math.random() * 1.8; phase[i] = Math.random() * 6.283; i++;
+  }
+  const hg = new THREE.BufferGeometry(), posAttr = new THREE.BufferAttribute(pos, 3); posAttr.setUsage(THREE.DynamicDrawUsage);
+  hg.setAttribute('position', posAttr); hg.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+  hg.setAttribute('aColor', new THREE.BufferAttribute(col, 3)); hg.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1));
+  const heart = new THREE.Group(); heart.add(new THREE.Points(hg, mat)); scene.add(heart);
+
+  // ---------- Lluvia de partículas: del corazón a la galaxia ----------
+  const RN = small ? 160 : 320, rp = new Float32Array(RN * 3), rc = new Float32Array(RN * 3), rs = new Float32Array(RN), rph = new Float32Array(RN), rv = new Float32Array(RN);
+  for (let i = 0; i < RN; i++) { PAL[1 + Math.floor(Math.random() * 4)].toArray(rc, i * 3); rs[i] = .6 + Math.random() * .9; rph[i] = Math.random() * 6.283; rv[i] = 5 + Math.random() * 9; }
+  const rg = new THREE.BufferGeometry(), rpa = new THREE.BufferAttribute(rp, 3); rpa.setUsage(THREE.DynamicDrawUsage);
+  rg.setAttribute('position', rpa); rg.setAttribute('aSize', new THREE.BufferAttribute(rs, 1));
+  rg.setAttribute('aColor', new THREE.BufferAttribute(rc, 3)); rg.setAttribute('aPhase', new THREE.BufferAttribute(rph, 1));
+  const rain = new THREE.Points(rg, mat); rain.frustumCulled = false; scene.add(rain);
+
+  // ---------- Layout responsive ----------
+  let hs = 1, gs = 1, heartY = 15, lookY = 6, dist = 70, prevDist = 0;
+  function resetDrop(i, spread) {
+    const a = Math.random() * 6.283, r = Math.sqrt(Math.random()) * 5 * hs;
+    rp[i * 3] = Math.cos(a) * r; rp[i * 3 + 2] = Math.sin(a) * r * .7;
+    rp[i * 3 + 1] = spread ? Math.random() * (heartY - 6 * hs) : heartY - 6.5 * hs;
+  }
+  function layout() {
+    const w = innerWidth, h = innerHeight, a = w / h, portrait = a < .9, dpr = Math.min(devicePixelRatio || 1, small ? 1.75 : 2);
+    renderer.setPixelRatio(dpr); renderer.setSize(w, h, false); camera.aspect = a;
+    gs = portrait ? .72 : 1; hs = portrait ? 1.45 : (a < 1.4 ? 1.2 : 1);
+    galaxy.scale.setScalar(gs); heartY = 6 + 9 * hs; heart.scale.setScalar(3.2 * hs);
+    const top = heartY + 7.4 * hs + 8; lookY = top * .35;
+    const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), H = Math.max(R * gs * 1.02, 9 * hs);
+    const nd = Math.max(H / (t * a), (top - lookY) / t) * 1.06, ratio = prevDist ? nd / prevDist : 0;
+    prevDist = dist = nd;
+    controls.target.set(0, lookY, 0); controls.minDistance = dist * .3; controls.maxDistance = dist * 2.4;
+    if (ratio) camera.position.sub(controls.target).multiplyScalar(ratio).add(controls.target);   // conserva el ángulo al rotar/redimensionar
+    else camera.position.set(0, lookY + dist * .3, dist * .95);
+    camera.updateProjectionMatrix(); controls.update(); starU.uPR.value = dpr; U.uK.value = dist; U.uPixel.value = (dpr * h / 900 * 1.6 + .4) * .6;
+    for (let i = 0; i < RN; i++) resetDrop(i, true);
+  }
+  addEventListener('resize', layout); layout();
+
+  // ---------- Interacción con el corazón (Raycasting en espacio local) ----------
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), inv = new THREE.Matrix4(), o = new THREE.Vector3(), d = new THREE.Vector3();
+  let active = false, hasPtr = false, px = 0;
+  const setPtr = e => { ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); hasPtr = true; };
+  canvas.addEventListener('pointermove', e => { setPtr(e); if (e.pointerType === 'mouse') active = true; });
+  canvas.addEventListener('pointerdown', e => { setPtr(e); active = true; });
+  const end = e => { if (e.pointerType !== 'mouse' || e.type === 'pointerleave') active = false; };
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(n => canvas.addEventListener(n, end));
+  canvas.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+
+  const RAD = small ? 1.25 : 1, FORCE = 55, K = 16, DAMP = 2.6;
+  let last = performance.now(), t = 0;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const dt = Math.min((now - last) / 1000, .033); last = now; t += dt;
+    galaxy.rotation.y += dt * (reduce ? .01 : .05);
+    rings[0].rotation.z += dt * .2;
+    for (const l of LS) { const k = 1 + (reduce ? 0 : .08 * Math.sin(t * 2 + l.userData.ph)); l.scale.set(LBASE * k, LBASE * .75 * k, 1); }
+    starPts.rotation.y += dt * (reduce ? 0 : .003);
+    heart.rotation.y += dt * (reduce ? .08 : .38);
+    heart.position.y = heartY + (reduce ? 0 : Math.sin(t * .9) * .5 * hs);
+    controls.update(); camera.updateMatrixWorld();
+    heart.updateMatrixWorld(true);
+    const useRay = active && hasPtr;
+    if (useRay) { ray.setFromCamera(ndc, camera); inv.copy(heart.matrixWorld).invert();
+      o.copy(ray.ray.origin).applyMatrix4(inv); d.copy(ray.ray.direction).transformDirection(inv).normalize(); }
+    const damp = Math.exp(-DAMP * dt);
+    for (let i = 0, k = 0; i < N; i++, k += 3) {
+      let vx = vel[k], vy = vel[k + 1], vz = vel[k + 2];
+      const x = pos[k], y = pos[k + 1], z = pos[k + 2];
+      if (useRay) {
+        const wx = x - o.x, wy = y - o.y, wz = z - o.z, tt = wx * d.x + wy * d.y + wz * d.z;
+        const rx = wx - d.x * tt, ry = wy - d.y * tt, rz = wz - d.z * tt, d2 = rx * rx + ry * ry + rz * rz;
+        if (d2 < RAD * RAD) {
+          const dd = Math.sqrt(d2) + .0001, s = 1 - dd / RAD, f = s * s * FORCE * dt / dd;
+          vx += rx * f + (Math.random() - .5) * s * 2.5; vy += ry * f + (Math.random() - .5) * s * 2.5;
+          vz += rz * f + d.z * s * FORCE * dt * .15 + (Math.random() - .5) * s * 2.5;
+        }
+      }
+      vx = (vx + (home[k] - x) * K * dt) * damp; vy = (vy + (home[k + 1] - y) * K * dt) * damp; vz = (vz + (home[k + 2] - z) * K * dt) * damp;
+      vel[k] = vx; vel[k + 1] = vy; vel[k + 2] = vz; pos[k] = x + vx * dt; pos[k + 1] = y + vy * dt; pos[k + 2] = z + vz * dt;
+    }
+    posAttr.needsUpdate = true;
+    const sp = reduce ? .3 : 1;
+    for (let i = 0; i < RN; i++) { rp[i * 3 + 1] -= rv[i] * sp * dt; if (rp[i * 3 + 1] < 0) resetDrop(i, false); }
+    rpa.needsUpdate = true;
+    U.uTime.value = t; U.uGlow.value = 1 + (reduce ? 0 : .18 * Math.sin(t * 2));
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(frame);
+  setTimeout(() => document.body.classList.add('on'), 100);
+
+  // ---------- Cartas ----------
+  const modal = document.getElementById('modal');
+  const mt = document.getElementById('mt'), mm = document.getElementById('mm'), ms = document.getElementById('ms');
+  const closeModal = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); };
+  document.getElementById('x').onclick = closeModal;
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  // ---------- 20 cartas dentro de la galaxia (giran con ella; toca una para abrirla) ----------
+  /* ✏️ EDITA AQUÍ LOS 20 MENSAJES: [título, mensaje] */
+  const GALAXY_LETTERS = [
+    ["Carta 1", "Desde que llegaste, el universo tiene un lugar favorito."],
+    ["Carta 2", "Tu sonrisa es la estrella más brillante que he visto."],
+    ["Carta 3", "Contigo hasta el silencio se siente bonito."],
+    ["Carta 4", "Gracias por ser mi calma en medio del ruido."],
+    ["Carta 5", "Si pudiera pedir un deseo, te elegiría otra vez."],
+    ["Carta 6", "Eres mi pensamiento favorito de cada mañana."],
+    ["Carta 7", "Ninguna galaxia se compara con tu mirada."],
+    ["Carta 8", "Me encanta cómo haces especial lo más simple."],
+    ["Carta 9", "Contigo aprendí que el hogar puede ser una persona."],
+    ["Carta 10", "Cada día a tu lado es mi día favorito."],
+    ["Carta 11", "Tu risa es mi canción preferida."],
+    ["Carta 12", "Aunque estemos lejos, mi cielo es el mismo que el tuyo."],
+    ["Carta 13", "Eres la razón por la que miro las estrellas con ternura."],
+    ["Carta 14", "No hay distancia que me haga dejar de pensarte."],
+    ["Carta 15", "Me haces mejor sin siquiera intentarlo."],
+    ["Carta 16", "Eres mi sorpresa más linda de la vida."],
+    ["Carta 17", "Quiero cuidar tu corazón como cuido mis sueños."],
+    ["Carta 18", "A tu lado el tiempo se vuelve suave."],
+    ["Carta 19", "Eres poesía que no necesita palabras."],
+    ["Carta 20", "Ana María: eres mi lugar favorito en el universo."]
+  ];
+  const envTex = (() => {
+    const c = document.createElement('canvas'); c.width = 128; c.height = 96; const g = c.getContext('2d');
+    g.shadowColor = '#22D3EE'; g.shadowBlur = 10; g.lineJoin = 'round'; g.lineCap = 'round';
+    g.fillStyle = 'rgba(29,78,216,.8)'; g.strokeStyle = '#BAE6FD'; g.lineWidth = 4;
+    g.fillRect(10, 14, 108, 68); g.strokeRect(10, 14, 108, 68);
+    g.lineWidth = 3; g.beginPath(); g.moveTo(10, 16); g.lineTo(64, 56); g.lineTo(118, 16);
+    g.moveTo(10, 80); g.lineTo(52, 46); g.moveTo(118, 80); g.lineTo(76, 46); g.stroke();
+    g.fillStyle = '#22D3EE'; g.shadowBlur = 6; g.beginPath(); g.moveTo(64, 52);
+    g.bezierCurveTo(52, 38, 76, 38, 64, 56); g.bezierCurveTo(52, 38, 76, 38, 64, 52); g.fill();
+    return new THREE.CanvasTexture(c);
+  })();
+  const LS = [], LBASE = 4.6;
+  GALAXY_LETTERS.forEach(([t, m], i) => {
+    const r = 15 + (i / 20) * (R - 22) + (Math.random() - .5) * 4, a = (i % 4) * Math.PI / 2 + r * .085 + (Math.random() - .5) * .5;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: envTex, transparent: true, depthWrite: false }));
+    sp.position.set(Math.cos(a) * r, (Math.random() - .5) * 5, Math.sin(a) * r); sp.scale.set(LBASE, LBASE * .75, 1);
+    sp.renderOrder = 2; sp.userData = { L: { t, m, s: '— Con amor' }, ph: Math.random() * 6.283 };
+    galaxy.add(sp); LS.push(sp);
+  });
+  const lray = new THREE.Raycaster(), lm = new THREE.Vector2(); let ldown = null;
+  const lhit = e => { lm.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); lray.setFromCamera(lm, camera); return lray.intersectObjects(LS)[0]; };
+  canvas.addEventListener('pointerdown', e => { ldown = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+  canvas.addEventListener('pointerup', e => {   // toque corto sin arrastrar = abrir carta (arrastrar = orbitar)
+    if (!ldown) return; const moved = Math.hypot(e.clientX - ldown.x, e.clientY - ldown.y), dt = performance.now() - ldown.t; ldown = null;
+    if (moved < 8 && dt < 600) { const h = lhit(e); if (h) { const L = h.object.userData.L; mt.textContent = L.t; mm.textContent = L.m; ms.textContent = L.s;
+      modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); } }
+  });
+  canvas.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') canvas.style.cursor = lhit(e) ? 'pointer' : 'grab'; });
+
+  // ---------- Música (se activa con el primer toque/clic) ----------
+  const bgm = document.getElementById('bgm'), btn = document.getElementById('music');
+  let userPaused = false;
+  const sync = () => btn.classList.toggle('on', !bgm.paused);
+  const musicError = () => {
+    btn.classList.remove('on');
+    btn.title = 'Añade un archivo music.mp3 con permiso de publicación junto a index.html';
+    btn.setAttribute('aria-label', 'Música no disponible');
+  };
+  const unlock = e => {
+    if (userPaused || btn.contains(e.target)) return;
+    bgm.play().then(() => { sync(); ['pointerup', 'keydown'].forEach(n => removeEventListener(n, unlock)); }).catch(musicError);
+  };
+  ['pointerup', 'keydown'].forEach(n => addEventListener(n, unlock));
+  btn.onclick = () => {
+    if (bgm.paused) { userPaused = false; bgm.play().then(sync).catch(musicError); } else { userPaused = true; bgm.pause(); sync(); }
+  };
+  bgm.addEventListener('error', musicError);
+})();
+</script>
+</body>
+</html>
